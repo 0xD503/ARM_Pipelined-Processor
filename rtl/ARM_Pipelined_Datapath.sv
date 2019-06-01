@@ -58,7 +58,7 @@ module ARM_Mux_2x1
 	#(parameter	BusWidth	= 32)
 	(input logic[(BusWidth - 1):0]	i_In_0, i_In_1,
 	input logic						i_SelectInput,
-	output logic[(BusWidth - 1):0]	o_Output,);
+	output logic[(BusWidth - 1):0]	o_Output);
 
 
 	assign o_Output = (i_SelectInput) ?	i_In_1 : i_In_0;
@@ -69,7 +69,7 @@ module ARM_4_bit_Mux_2x1
 	#(parameter	BusWidth	= 4)
 	(input logic[(BusWidth - 1):0]	i_In_0, i_In_1,
 	input logic						i_SelectInput,
-	output logic[(BusWidth - 1):0]	o_Output,);
+	output logic[(BusWidth - 1):0]	o_Output);
 
 
 	assign o_Output = (i_SelectInput) ?	i_In_1 : i_In_0;
@@ -82,13 +82,27 @@ module ARM_Pipelined_RegisterFile
 				RegisterFileSize	= 15)
 	(input logic						i_CLK, i_NRESET,
 	input logic							i_WriteEnable,
-	input logic[(RegAddrWidth - 1):0]	i_Src_1_Select, i_Src_2_Select, i_Write_Src_Select,
+	input logic[(RegAddrWidth - 1):0]	i_Src_1_Addr, i_Src_2_Addr, i_Write_Src_Addr,
 	input logic[(BusWidth - 1):0]		i_WriteData,
 	input logic[(BusWidth - 1):0]		i_R15,
-	input logic[(BusWidth - 1):0]		i_RegFile_Out_1, i_RegFile_Out_2);
+	output logic[(BusWidth - 1):0]		o_RegFile_Out_1, o_RegFile_Out_2);
+
+	logic[(BusWidth - 1):0]				RegisterFile[(RegisterFileSize - 1):0];
 
 
+	always_ff	@(posedge i_CLK, negedge i_NRESET)
+	begin
+		if (~i_NRESET)
+		begin
+			int i;
+			for (i = 0; i < RegisterFileSize; i = i + 1)	RegisterFile[i] = 32'h00000000;
+		end
+		else if (i_WriteEnable)								RegisterFile[i_Write_Src_Addr] = i_WriteData;
+	end
 
+
+	assign o_RegFile_Out_1 = (i_Src_1_Addr == 4'hF) ?	i_R15 : RegisterFile[i_Src_1_Addr];
+	assign o_RegFile_Out_2 = (i_Src_2_Addr == 4'hF) ?	i_R15 : RegisterFile[i_Src_2_Addr];
 
 endmodule
 
@@ -117,13 +131,13 @@ module	ARM_Pipelined_ALU
 	#(parameter	BusWidth	= 32)
 	(input logic[(BusWidth - 1):0]	i_In_A, i_In_B,
 	input logic[1:0]				i_ALU_Control,
-	output logic[(BusWidth - 1):0]	o_Out)
+	output logic[(BusWidth - 1):0]	o_Out,
 	output logic[3:0]				o_Flags);
 
 	typedef enum logic[1:0]	{ADD = 2'b00, SUB = 2'b01, AND = 2'b10, ORR = 2'b11}	en_ALU_Operation;
 
 	logic[(BusWidth - 1):0]	s_Out;
-	logic[(BusWidth - 1):0]	s_In_B, s_In_Not_B;
+	logic[(BusWidth - 1):0]	s_In_B;//, s_In_Not_B;
 	logic					s_Flag_N, s_Flag_Z;
 	logic					s_Flag_C, s_Flag_V;
 
@@ -132,10 +146,10 @@ module	ARM_Pipelined_ALU
 	always_comb
 	begin
 		case (i_ALU_Control[1:0])
-			ADD:	s_Out = i_In_A + i_In_B;
-			SUB:	s_Out = i_In_A - i_In_B;
-			AND:	s_Out = i_In_A & i_In_B;
-			ORR:	s_Out = i_In_A | i_In_B;
+			ADD:	s_Out = i_In_A + s_In_B;
+			SUB:	s_Out = i_In_A - s_In_B;
+			AND:	s_Out = i_In_A & s_In_B;
+			ORR:	s_Out = i_In_A | s_In_B;
 
 			default:	s_Out = 32'h00000000;
 		endcase
@@ -149,15 +163,15 @@ module	ARM_Pipelined_ALU
 		case (i_ALU_Control[1:0])
 			ADD:
 			begin
-				s_Flag_C = (i_In_A >= i_In_B) ?;
-				s_Flag_V =	((i_In_A[BusWidth - 1] & i_In_B[BusWidth - 1] & ~s_Out[BusWidth - 1]) |
-							(~i_In_A[BusWidth - 1] & ~i_In_B[BusWidth - 1] & s_Out[BusWidth - 1));
+				s_Flag_C = (i_In_A >= s_In_B) ?	1'b1 : 1'b0;
+				s_Flag_V =	((i_In_A[BusWidth - 1] & s_In_B[BusWidth - 1] & ~s_Out[BusWidth - 1]) |
+							(~i_In_A[BusWidth - 1] & ~s_In_B[BusWidth - 1] & s_Out[BusWidth - 1]));
 			end
 			SUB:
 			begin
-				s_Flag_C = (i_In_A < i_In_B) ?;
-				s_Flag_V =	((i_In_A[BusWidth - 1] & ~i_In_B[BusWidth - 1] & s_Out[BusWidth - 1]) |
-							(~i_In_A[BusWidth - 1] & i_In_B[BusWidth - 1] & s_Out[BusWidth - 1));;
+				s_Flag_C = (i_In_A < s_In_B) ?	1'b1 : 1'b0;
+				s_Flag_V =	((i_In_A[BusWidth - 1] & ~s_In_B[BusWidth - 1] & s_Out[BusWidth - 1]) |
+							(~i_In_A[BusWidth - 1] & s_In_B[BusWidth - 1] & s_Out[BusWidth - 1]));;
 			end
 
 			default:
@@ -168,8 +182,8 @@ module	ARM_Pipelined_ALU
 		endcase
 	end
 
-	assign s_In_Not_B = ~i_In_B;
-	assign s_In_B = (i_ALU_Control[2]) ?	s_In_Not_B : i_In_B;
+	//assign s_In_Not_B = ~i_In_B;
+	assign s_In_B = i_In_B;//(i_ALU_Control[2]) ?	s_In_Not_B : i_In_B;
 
 	assign o_Out = s_Out;
 	assign o_Flags = {s_Flag_N, s_Flag_Z, s_Flag_C, s_Flag_V};
@@ -186,10 +200,10 @@ module ARM_Mux_4x1
 	always_comb
 	begin
 		case (i_InputSelect)
-			2'b00:	o_Output = i_In_0;
-			2'b01:	o_Output = i_In_1;
-			2'b10:	o_Output = i_In_2;
-			2'b11:	o_Output = i_In_3;
+			2'b00:	o_Out = i_In_0;
+			2'b01:	o_Out = i_In_1;
+			2'b10:	o_Out = i_In_2;
+			2'b11:	o_Out = i_In_3;
 
 			default:	o_Output = i_In_0;
 		endcase
