@@ -29,8 +29,8 @@ module	ARM_Pipelined_ALU
 	//	Flags logic
 	always_comb
 	begin
-		s_Flag_N = s_Out[31];
-		s_Flag_Z = (s_Out == 0) ?;
+		s_Flag_N = s_Out[BusWidth - 1];
+		s_Flag_Z = (s_Out == 0) ?		1'b0 : 1'b1;
 		case (i_ALU_Control[1:0])
 			ADD:
 			begin

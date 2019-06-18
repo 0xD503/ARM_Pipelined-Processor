@@ -39,7 +39,7 @@ module ARM_Mux_4x1
 			2'b10:	o_Out = i_In_2;
 			2'b11:	o_Out = i_In_3;
 
-			default:	o_Output = i_In_0;
+			default:	o_Out = i_In_0;
 		endcase
 	end
 
