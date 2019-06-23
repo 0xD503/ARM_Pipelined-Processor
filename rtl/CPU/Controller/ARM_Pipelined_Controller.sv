@@ -17,7 +17,7 @@ module ARM_Pipelined_Controller
 	output logic		o_ALU_Src_Execute,
 	output logic[1:0]	o_ALU_Control_Execute,
 	output logic		o_Reg_Write_Memory, o_Reg_Write_WriteBack,
-	output logic		o_Mem_Write_Memory, o_Mem_Write_WriteBack,
+	output logic		o_Mem_Write_Memory,
 
 
 	input logic			i_Flush_Execute,
@@ -123,9 +123,12 @@ module ARM_Pipelined_Controller
 		end
 	end
 
+
 	ARM_Pipelined_ConditionUnit			CondUnit
-	(s_Flag_Write_Execute, s_Cond_Execute,
+	(i_CLK, i_NRESET,
+	s_Flag_Write_Execute, s_Cond_Execute,
 	s_Flags_Execute,
+	i_ALU_Flags,
 	s_Flags,
 	s_CondEx_Execute);
 
@@ -166,11 +169,18 @@ module ARM_Pipelined_Controller
 			s_Reg_Write_WriteBack = s_Reg_Write_Memory;
 			s_Mem_To_Reg_WriteBack = s_Mem_To_Reg_Memory;
 		end
+	end
 
+
+	assign o_ALU_Control_Execute = s_ALU_Control_Execute;
+	assign o_ALU_Src_Execute = s_ALU_Src_Execute;
 
 	assign o_PC_Src_WriteBack = s_PC_Src_WriteBack;
+	assign o_Reg_Write_Memory = s_Reg_Write_Memory;
 	assign o_Reg_Write_WriteBack = s_Reg_Write_WriteBack;
+	assign o_Mem_Write_Memory = s_Mem_Write_Memory;
 	assign o_Mem_To_Reg_WriteBack = s_Mem_To_Reg_WriteBack;
+	assign o_Branch_Taken_Execute = s_Branch_Taken_Execute;
 
 endmodule
 

@@ -49,13 +49,20 @@ module ARM_Pipelined_ALUDecoder
 					if (i_Funct[0])	o_Flag_Write_Decode = 2'b11;
 					else			o_Flag_Write_Decode = 2'b00;
 				end
+
+				default:
+				begin
+					o_ALU_Control_Decode = 2'b00;
+					o_No_Write_Decode = 1'b0;
+					o_Flag_Write_Decode = 2'b00;
+				end
 			endcase
 		end
 		else
 		begin
 			o_ALU_Control_Decode = 2'b00;
-			o_Flag_Write_Decode = 2'b00;
 			o_No_Write_Decode = 1'b0;
+			o_Flag_Write_Decode = 2'b00;
 		end
 	end
 

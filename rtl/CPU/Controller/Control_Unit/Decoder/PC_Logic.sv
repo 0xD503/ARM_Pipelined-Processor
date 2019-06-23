@@ -5,7 +5,7 @@ module	ARM_Pipelined_PC_Logic
 	output logic		o_PC_Src_Decode);
 
 
-	assign o_PC_Source_Decode = ((i_Rd == 4'hF) & i_Reg_Write) ?	1'b1 : i_Branch;
+	assign o_PC_Src_Decode = ((i_Rd == 4'hF) & i_Reg_Write) ?	1'b1 : i_Branch;
 
 endmodule
 

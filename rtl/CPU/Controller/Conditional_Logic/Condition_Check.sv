@@ -18,7 +18,7 @@ module ARM_Pipelined_ConditionCheck
 							LT = 4'hB,
 							GT = 4'hC,
 							LE = 4'hD,
-							AL = 4'hE}
+							AL = 4'hE}	condition_t;
 
 
 	always_comb
@@ -42,6 +42,8 @@ module ARM_Pipelined_ConditionCheck
 			GT:	o_CondEx_Execute = ~i_Flags_NZ[0] & ~(i_Flags_NZ[1] ^ i_Flags_CV[0]);
 			LE:	o_CondEx_Execute = i_Flags_NZ[0] | (i_Flags_NZ[1] ^ i_Flags_CV[0]);
 			AL:	o_CondEx_Execute = 1'b0;
+
+			default:	o_CondEx_Execute = 1'b0;
 		endcase
 	end
 

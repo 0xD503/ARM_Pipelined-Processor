@@ -16,6 +16,12 @@ module ARM_Pipelined_MainDecoder
 
 	always_comb
 	begin
+		o_Mem_To_Reg_Decode = 1'bx;
+		o_Reg_Write_Decode = 1'bx;
+		o_Mem_Write_Decode = 1'bx;
+		o_Reg_Src_Decode = 2'bxx;
+		o_ALU_Src_Decode = 1'bx;
+		o_Imm_Src_Decode = 2'bxx;
 		case (i_Op)
 			DP:
 			begin
@@ -58,10 +64,20 @@ module ARM_Pipelined_MainDecoder
 			begin
 				o_Mem_To_Reg_Decode = 1'b0;
 				o_Mem_Write_Decode = 1'b0;
-				o_Mem_Write_Decode = 1'b0;
+				o_Reg_Write_Decode = 1'b0;
 				o_Reg_Src_Decode = 2'bx1;
 				o_ALU_Src_Decode = 1'b1;
 				o_Imm_Src_Decode = 2'b10;
+			end
+
+			default:
+			begin
+				o_Mem_To_Reg_Decode = 1'bx;
+				o_Reg_Write_Decode = 1'bx;
+				o_Mem_Write_Decode = 1'bx;
+				o_Reg_Src_Decode = 2'bxx;
+				o_ALU_Src_Decode = 1'bx;
+				o_Imm_Src_Decode = 2'bxx;
 			end
 		endcase
 	end
