@@ -1,4 +1,4 @@
-module ControlUnit
+module ARM_Pipelined_ControlUnit
 	(input logic[1:0]	i_Op,
 	input logic[5:0]	i_Funct,
 	input logic[3:0]	i_Rd,
@@ -27,7 +27,7 @@ module ControlUnit
 		o_Flag_Write_Decode,
 		o_No_Write_Decode);
 
-	assign o_Branch_Decode = ;
+	assign o_Branch_Decode = (i_Op[1:0] == 2'b10) ?	1'b1 : 1'b0;
 
 endmodule
 
