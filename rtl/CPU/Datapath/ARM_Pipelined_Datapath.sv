@@ -28,7 +28,10 @@ module ARM_Pipelined_Datapath
 	//	Hazard unit
 	input logic						i_Stall_Fetch, i_Stall_Decode,
 	input logic						i_Flush_Decode, i_Flush_Execute,
-	input logic[1:0]				i_Forward_A_Execute, i_Forward_B_Execute);
+	input logic[1:0]				i_Forward_A_Execute, i_Forward_B_Execute,
+
+	output logic[(BusWidth - 1):0]	o_RegFile_Data_Execute_1, o_RegFile_Data_Execute_2,
+	output logic[3:0]	o_DestReg_Memory, o_DestReg_WriteBack);
 
 
 	logic[(BusWidth - 1):0]	s_PC_Write_Src_0, s_PC_Write_Src_1, s_PC_Write;
@@ -232,6 +235,7 @@ module ARM_Pipelined_Datapath
 	assign s_ALU_Src_A_Execute_2 = s_ALU_Out_Memory;
 	assign s_ALU_Src_A_Execute_Select = i_Forward_A_Execute;
 
+
 	ARM_Mux_4x1								ALU_Src_A_Execute_Mux
 		(s_ALU_Src_A_Execute_0, s_ALU_Src_A_Execute_1, s_ALU_Src_A_Execute_2, 32'h00000000,
 		s_ALU_Src_A_Execute_Select,
@@ -321,6 +325,13 @@ module ARM_Pipelined_Datapath
 	assign o_Funct = s_Funct;
 	assign o_Rd = s_Rd;
 	assign o_Cond = s_Condition;
+
+	assign o_RegFile_Data_Execute_1 = s_RegFile_Data_A1;
+	assign o_RegFile_Data_Execute_2 = s_RegFile_Data_A2;
+
+	assign o_DestReg_Memory = s_Write_A3_Memory;
+
+	assign o_DestReg_WriteBack = s_Write_A3_WriteBack;
 
 
 endmodule
