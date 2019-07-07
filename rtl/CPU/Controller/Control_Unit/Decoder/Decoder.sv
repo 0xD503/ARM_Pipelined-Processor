@@ -32,7 +32,7 @@ module ARM_Pipelined_Decoder
 	s_Branch,
 	s_ALU_Op);
 
-	ARM_Pipelined_ALUDecoder
+	ARM_Pipelined_ALUDecoder	ALU_Decoder
 	(i_Funct[4:0],
 	s_ALU_Op,
 	o_ALU_Control_Decode,
