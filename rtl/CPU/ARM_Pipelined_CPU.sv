@@ -7,10 +7,10 @@ module ARM_Pipelined_CPU
 	output logic[(BusWidth - 1):0]	o_Data_Addr,
 
 	output logic[(BusWidth - 1):0]	o_Write_Data,
-	input logic[(BusWidth - 1):0]	o_Read_Data);
+	input logic[(BusWidth - 1):0]	i_Read_Data);
 
 	//	[Datapath]	Control Unit
-	logic					s_PC_WriteBack, s_Reg_Write_WriteBack, s_Mem_To_Reg_WriteBack;
+	logic					s_PC_Src_WriteBack, s_Reg_Write_WriteBack, s_Mem_To_Reg_WriteBack;
 	logic					s_Branch_Taken_Execute, s_ALU_Src_Execute;
 	logic[1:0]				s_Reg_Src_Decode, s_Imm_Src_Decode;
 	logic[1:0]				s_ALU_Control_Execute;
@@ -19,6 +19,7 @@ module ARM_Pipelined_CPU
 	logic[3:0]				s_Rd;
 	logic[3:0]				s_Cond;
 	logic[3:0]				s_ALU_Flags;
+	logic					s_Mem_To_Reg_Writeback;
 
 
 	//	[Datapath]	Hazard Unit
@@ -31,6 +32,9 @@ module ARM_Pipelined_CPU
 
 	//	[Control Unit]	Hazard Unit
 	logic					s_SCLR;
+	logic					s_Reg_Write_Memory;
+
+	logic					s_Mem_Write_Memory;
 
 
 
@@ -65,7 +69,7 @@ module ARM_Pipelined_CPU
 		s_DestReg_Memory, s_DestReg_WriteBack);
 
 
-	ARM_Pipelined_Controller
+	ARM_Pipelined_Controller		Controller
 		(i_CLK, i_NRESET,
 		s_SCLR,
 
@@ -77,13 +81,16 @@ module ARM_Pipelined_CPU
 
 		s_PC_Src_WriteBack,
 		s_Branch_Taken_Execute,
-		s_Reg_Src_Decode, o_Imm_Src_Decode,
+		s_Reg_Src_Decode, s_Imm_Src_Decode,
 		s_ALU_Src_Execute,
 		s_ALU_Control_Execute,
-		s_Reg_Write_Memory, o_Reg_Write_WriteBack,
+		s_Reg_Write_Memory, s_Reg_Write_WriteBack,
 		s_Mem_Write_Memory,
 
 		s_Flush_Execute,
 		s_Mem_To_Reg_WriteBack);
+
+
+
 
 endmodule
